@@ -1,0 +1,159 @@
+CREATE DATABASE Green_moon;
+USE Green_moon;
+
+CREATE TABLE Driver (
+ ID INT PRIMARY KEY AUTO_INCREMENT, 
+ SSN INT(10) UNIQUE NOT NULL,
+ fName VARCHAR(15) NOT NULL,
+ lName VARCHAR(15) NOT NULL,
+ birth date NOT NULL,
+ carID INT(10) REFERENCES Car(ID),
+ phonNum int(10) UNIQUE NOT NULL,
+ email VARCHAR(50) UNIQUE,
+ region VARCHAR(10) NOT NULL
+);
+
+
+CREATE TABLE Material_provider (
+ ID INT PRIMARY KEY AUTO_INCREMENT, 
+ fName VARCHAR(15) NOT NULL,
+ lName VARCHAR(15) NOT NULL,
+ phonNum int(10) UNIQUE NOT NULL,
+ email VARCHAR(50) UNIQUE,
+ region VARCHAR(10) NOT NULL,
+ LOCATION_URL VARCHAR(150) NOT NULL
+);
+
+
+CREATE TABLE Material_purchaser (
+ ID INT PRIMARY KEY AUTO_INCREMENT, 
+ fName VARCHAR(15) NOT NULL,
+ lName VARCHAR(15) NOT NULL,
+ phonNum int(10) UNIQUE NOT NULL,
+ email VARCHAR(50) UNIQUE,
+ region VARCHAR(10) NOT NULL,
+ LOCATION_URL VARCHAR(150) NOT NULL
+);
+
+
+CREATE TABLE proOrder (
+ clientID INT,
+ orderID INT ,
+ dateOf date, 
+ driverID INT REFERENCES Driver(ID),
+ PRIMARY KEY (clientID, orderID) ,
+ Foreign key(clientID) REFERENCES Material_provider(ID)
+ 
+);
+
+CREATE TABLE purOrder (
+ clientID INT ,
+ orderID INT ,
+ dateOf date, 
+ totalCost DOUBLE(5,2), -- COMPUTED VALUE
+ driverID INT REFERENCES Driver(ID),
+ 
+ PRIMARY KEY (clientID, orderID) ,
+ Foreign key(clientID) REFERENCES Material_purchaser(ID)
+ 
+);
+CREATE TABLE CONTAIN_OF_PRO (
+ order_ID INT NOT NULL AUTO_INCREMENT,
+ client_ID INT NOT NULL,
+ material_ID INT NOT NULL,
+ size DOUBLE(3,1) NOT NULL,
+ 
+ primary key(client_ID, order_ID, material_ID),
+ foreign key(client_ID,order_ID) REFERENCES proOrder(clientID,orderID) ,
+ foreign key(material_ID) REFERENCES Material(material_ID) 
+);
+
+
+CREATE TABLE CONTAIN_OF_PUR (
+order_ID INT NOT NULL AUTO_INCREMENT,
+ client_ID INT NOT NULL,
+ material_ID INT NOT NULL,
+ size DOUBLE(3,1) NOT NULL,
+ 
+ primary key(client_ID, order_ID, material_ID),
+ foreign key(client_ID,order_ID) REFERENCES purOrder (clientID,order_ID) ,
+ foreign key(material_ID) REFERENCES Material(material_ID) 
+);
+
+CREATE TABLE Material (
+ material_ID INT PRIMARY KEY AUTO_INCREMENT,
+ material_cost DOUBLE(5,2) NOT NULL,
+ material_name VARCHAR(20) UNIQUE NOT NULL,
+ material_description VARCHAR(200) NOT NULL
+);
+
+CREATE TABLE Car (
+ ID INT PRIMARY KEY AUTO_INCREMENT,
+ plate_number CHAR(7) UNIQUE NOT NULL,
+ brand VARCHAR(25) NOT NULL,
+ model VARCHAR(25) NOT NULL,
+ color VARCHAR(25) NOT NULL,
+ manufacturing_year INT(4) NOT NULL
+);
+
+
+
+
+
+
+
+-- Queries
+select fName, lName, phonNum, region, city from Driver union select brand, model, color, plate_number from Car;
+
+
+SELECT * FROM purOrder AS O, Material_purchaser AS P WHERE totalCost BETWEEN AVG(totalCost) AND MIN(totalCost)
+AND clientID = ID; 
+
+SELECT COUNT(*) AS Number_Of_Users_In_Central FROM Material_provider WHERE region LIKE 'C%' OR region LIKE 'c%'; 
+
+SELECT COUNT( driverID) FROM proOrder;
+SELECT COUNT( driverID) FROM purOrder;
+
+
+-- Nested Query -- 
+SELECT * FROM Material_purchaser 
+WHERE ID IN(SELECT clientID  FROM purOrder);
+
+SELECT * FROM Material_provider 
+WHERE ID IN(SELECT clientID  FROM proOrder);
+
+  SELECT COUNT(*) AS Number_Of_Delivery_For_ADriver FROM purOrder WHERE driverID = ANY (SELECT ID FROM Driver);
+  
+  SELECT COUNT(*) AS Number_Of_Delivery_For_ADriver FROM proOrder WHERE driverID = ANY (SELECT ID FROM Driver);
+  
+  
+  -- Order information
+  
+SELECT clientID, orderID, dateOf, driverID FROM proOrder AND SELECT fName, lName FROM Driver WHERE driverID= proOrder.ID AND SELECT plate_number, brand, model, color FROM Car WHERE carID = Car.ID;
+
+
+SELECT clientID, orderID, dateOf, driverID, totalCost FROM purOrder AND SELECT fName, lName FROM Driver WHERE driverID= proOrder.ID AND SELECT plate_number, brand, model, color FROM Car WHERE carID = Car.ID;
+
+SELECT ID FROM Driver WHERE ID = ANY (SELECT driverID FROM purOrder)
+
+SELECT ID, Name, orderID, totalCost FROM material_purchaser AS mp ,PURORDER AS o WHERE mp.ID= o.clientID ORDER BY totalCost DESC;
+
+SELECT * FROM driver AS D, car AS C WHERE D.carID = c.ID AND city='Khobar';
+
+Select material_ID, count(*)AS count_material from Material group by Material_ID;
+
+select clientID , sum(totalCost) as total_salary_client from purOrder group by clientID;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE NOOFDRIVER (IN city_name varchar(20) ,OUT no_driver INT)
+BEGIN
+SELECT COUNT(city_name) INTO no_driver FROM driver 
+WHERE city=city_name;
+END; $$
+
+
+Call NOOFDRIVER ('Khobar',@num);
+select @num as number_of_driver_incity ;
+
