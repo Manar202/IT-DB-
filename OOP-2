@@ -1,0 +1,549 @@
+private void contributebuttonActionPerformed(java.awt.event.ActionEvent evt) {                                                 
+        Contribute frame=new Contribute();
+        frame.setVisible(true);
+        this.dispose();
+    }                                                
+
+    
+    private void orderButtonActionPerformed(java.awt.event.ActionEvent evt) {                                            
+        Orderyourneeds frame=new Orderyourneeds();
+        frame.setVisible(true);
+        this.dispose();
+    }                                           
+
+    private void aboutusActionPerformed(java.awt.event.ActionEvent evt) {                                        
+        this.dispose();
+        Aboutus frame=new Aboutus();
+        frame.setVisible(true);
+    }                                       
+
+    private void workbuttonActionPerformed(java.awt.event.ActionEvent evt) {                                           
+        this.dispose();
+        DRIVERS frame=new DRIVERS();
+        frame.setVisible(true);
+    }
+private void signInBActionPerformed(java.awt.event.ActionEvent evt) {                                        
+        PreparedStatement ps;
+        ResultSet rs;
+        
+        String username = userNameTF.getText();
+        String pass = String.valueOf(passF.getPassword());
+        
+        
+        try {
+            ps = MyConnection.getConnection().prepareStatement(query);
+        
+            
+            ps.setString(1, username);
+            ps.setString(2, pass);
+            
+            rs = ps.executeQuery();
+            
+            if(rs.next())//if the account exists
+            {
+                    int id = rs.getInt("ID");
+                    String Fname= rs.getString("fName");
+                    String Lname= rs.getString("lName");
+                    int phnum = rs.getInt("phonNum");
+                    String Email= rs.getString("email");
+                    String Region= rs.getString("region");
+                    String LOC_URL= rs.getString("LOCATION_URL");
+                    String pas= rs.getString("password");
+                    
+                
+                    profile mf = new profile(id,Fname,Lname,phnum,Email,Region,LOC_URL,pas,x);
+                    mf.setVisible(true);
+                    
+                    this.dispose();
+            }
+            else{
+                    JOptionPane.showMessageDialog(null, "Incorrect Username Or Password", "Login Failed", 2);
+                }
+          } catch (SQLException ex) {
+            java.util.logging.Logger.getLogger(signin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }  
+        
+         
+    }
+
+
+private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {                                           
+        x=jComboBox1.getSelectedItem().toString();
+        
+        if( x=="donor"){
+        query = "SELECT * FROM `material_provider` WHERE `email` =? AND `password` =?";
+          
+    }
+        else if( x=="buyer"){
+        query ="SELECT * FROM `material_purchaser` WHERE `email`=? AND `password`=?";
+          
+    } 
+    }
+
+private void signUpBActionPerformed(java.awt.event.ActionEvent evt) {                                        
+        
+        
+        String fname = fNameTF.getText();
+        String lname = lNameTF.getText();
+        int Phone = Integer.parseInt(phTF.getText());
+        String email = emailTF.getText();
+        String pass = String.valueOf(passF.getPassword());
+        String re_pass = String.valueOf(re_passF.getPassword());
+        String region=regTF.getText();
+        String address = addTF.getText();
+                
+        
+        if(fname.equals(""))
+        {
+            JOptionPane.showMessageDialog(null, "Add A Username");
+        }
+        else if(pass.equals(""))
+        {
+            JOptionPane.showMessageDialog(null, "Add A Password");
+        }
+        else if(!pass.equals(re_pass))
+        {
+            JOptionPane.showMessageDialog(null, "Retype The Password Again");
+        }
+        
+        else if(checkemail(email))
+        {
+            JOptionPane.showMessageDialog(null, "This email Already Exist");
+        }
+        else if(address.equals(""))
+        {
+            JOptionPane.showMessageDialog(null, "Add A address");
+        }
+        
+        
+        else{
+            
+        PreparedStatement ps;
+        
+        try {
+            ps = MyConnection.getConnection().prepareStatement(query);
+        
+            
+            ps.setString(1, fname);
+            ps.setString(2, lname);
+            ps.setInt(3, Phone);
+            ps.setString(4, email);
+            ps.setString(5, region);
+            ps.setString(6, address);
+            ps.setString(7, pass);
+            
+            if(ps.executeUpdate() > 0)
+            {
+                JOptionPane.showMessageDialog(null, "New User Add");
+            }
+          } catch (SQLException ex) {
+            java.util.logging.Logger.getLogger(signup.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }  
+        
+        }
+    }                                       
+
+    private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {                                           
+        String x=jComboBox2.getSelectedItem().toString();
+
+        if( x=="1"){
+            query = "INSERT INTO `material_provider` (`fName`, `lName`, `phonNum`, `email`, `region`, `LOCATION_URL`,`password`) VALUES (?,?,?,?,?,?,?)";
+            query2 ="SELECT email FROM `material_provider` WHERE `email` =?";
+        }
+        else if( x=="2"){
+            query ="INSERT INTO `material_purchaser` (`fName`, `lName`, `phonNum`, `email`, `region`, `LOCATION_URL`,`password`) VALUES (?,?,?,?,?,?,?)";
+            query2 ="SELECT email FROM `material_purchaser` WHERE `email` =?";
+        }
+        
+
+
+    }
+
+
+private void ConfirmBActionPerformed(java.awt.event.ActionEvent evt) {                                         
+       
+        //personal information
+        int  id = Integer.parseInt(idTF.getText());
+        String  fName = fNameTF.getText();
+        String  LName = lNameTF.getText();
+        int  phone = Integer.parseInt(phoTF.getText());
+        String  Birth = ((JTextField)BDTF.getDateEditor().getUiComponent()).getText();
+        String  email = emailTf.getText();
+        String  region = regTF.getText();
+        
+        
+        
+        
+        //car informaion
+        String  plate = CplateTF.getText();
+        String  brand = cBrandTF.getText();
+        String  model = cModelTF.getText();
+        String  color = cColorTF.getText();
+        int manufacturing_year=Integer.parseInt(MyTF.getText());
+        
+        
+        if(fName.equals("")||LName.equals("")||Birth.equals("")||email.equals("")||region.equals(""))
+        {
+            JOptionPane.showMessageDialog(null, "Make sure your enerer all the information");
+        }
+        
+       PreparedStatement ps;
+       String querydriver = "INSERT INTO `Driver`( `SSN`, `fName`, `lName`, `birth`,`carID`, `phonNum`, `email`, `region`) VALUES (?,?,?,?,?,?,?,?)";
+       String querycar = "INSERT INTO `car`( `plate_number`, `brand`, `model`, `color`, `manufacturing_year`) VALUES (?,?,?,?,?)";
+       
+        
+       
+            try {
+                
+                
+            
+                ps = MyConnection.getConnection().prepareStatement(querycar);
+                ps.setString(1, plate);
+                ps.setString(2, brand);
+                ps.setString(3, model);
+                ps.setString(4, color);
+                ps.setInt(5, manufacturing_year);
+                
+            int carid=Caridnum();
+                
+                
+            if(ps.executeUpdate() > 0)
+            {
+             try {   
+                
+                ps = MyConnection.getConnection().prepareStatement(querydriver);
+                ps.setInt(1, id);
+                ps.setString(2, fName);
+                ps.setString(3, LName);
+                ps.setString(4, Birth);
+                ps.setInt(5, carid);
+                ps.setInt(6, phone);
+                ps.setString(7, email);
+                ps.setString(8, region);
+                
+                if(ps.executeUpdate() > 0){
+                JOptionPane.showMessageDialog(null, "Welcome to Green Moon we well contact you soon");
+                }
+            }catch (SQLException ex) {
+                Logger.getLogger(DRIVERS.class.getName()).log(Level.SEVERE, null, ex);
+            }     
+            }
+        } catch (SQLException ex) {
+                Logger.getLogger(DRIVERS.class.getName()).log(Level.SEVERE, null, ex);
+            }                    
+    }                                        
+
+    
+    
+   public int Caridnum(){
+       String query="SELECT COUNT(ID) AS carid FROM CAR";
+       int carcount = 0;
+       
+       PreparedStatement ps;
+        try {
+            ps = MyConnection.getConnection().prepareStatement(query);
+            ResultSet r =ps.executeQuery();
+            
+            while (r.next()){
+                carcount=r.getInt("carid");
+                //System.out.println("it is "+"   "+carcount);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DRIVERS.class.getName()).log(Level.SEVERE, null, ex);
+        }
+                
+                
+        
+        return carcount;
+   
+   }
+
+private void updateActionPerformed(java.awt.event.ActionEvent evt) {                                       
+        PreparedStatement ps;
+        //ResultSet rs;
+        String query;
+        
+        if(type=="donor"){
+        query="UPDATE material_provider SET fName=? ,lName=?,phonNum=?,email=?,region=?,LOCATION_URL=?,password=? WHERE ID=?";
+        }
+        
+        else //if(type=="buyer")
+        {
+        query="UPDATE material_purchaser SET fName=? ,lName=?,phonNum=?,email=?,region=?,LOCATION_URL=?,password=? WHERE ID=?";
+        }
+                
+        
+        
+        String fname = LNAME.getText();
+        String lname = LNAME.getText();
+        int Phone = Integer.parseInt(phTF.getText());
+        String email = emailTF.getText();
+        String pass = String.valueOf(passF.getPassword());
+        String region=regTF.getText();
+        String address = addTF.getText();  
+        
+        
+        try {
+            ps = MyConnection.getConnection().prepareStatement(query);
+            
+            ps.setString(1, fname);
+            ps.setString(2, lname);
+            ps.setInt(3, Phone);
+            ps.setString(4, email);
+            ps.setString(5, region);
+            ps.setString(6, address);
+            ps.setString(7, pass);
+            ps.setInt(8, id);
+            
+            if(ps.executeUpdate() > 0)
+            {
+                JOptionPane.showMessageDialog(null, "you informaion is updated ");
+               
+                
+            }
+            
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(profile.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+
+private void deleteActionPerformed(java.awt.event.ActionEvent evt) {                                       
+        PreparedStatement ps;
+        ResultSet rs;
+        String query;
+        
+        if(type=="donor"){
+        query="DELETE FROM material_provider  WHERE ID=?";
+        }
+        
+        else //if(type=="buyer")
+        {
+        query="DELETE FROM material_purchaser  WHERE ID=?";
+        }
+        
+         try {
+            ps = MyConnection.getConnection().prepareStatement(query);
+            
+            
+            ps.setInt(1, id);
+            
+            if(ps.executeUpdate() > 0)
+            {
+                JOptionPane.showMessageDialog(null, "you Account has been successfully deleted ");
+                this.dispose();
+                MainMenu frame=new MainMenu();
+                frame.setVisible(true);
+                
+            }
+            
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(profile.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+
+public HTRY(int id,String type) {
+        
+        if(type=="1"){
+            query="SELECT fName as driver_name,phNum as driver_phone ,material_name,size FROM driver,material ,contain_of_pro  ,proorder where client_ID=? and ID=driverID and material_ID=materialID and orderID=order_ID";
+            
+        }
+        else{
+            query="SELECT fName,phNum,material_name,totalCost FROM driver,material ,contain_of_pur  ,purorder where client_ID=? and ID=driverID and material_ID=materialID and orderID=order_ID;";
+        }
+        
+    initComponents();
+    
+        ImageIcon rrr=new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("UNAME.png")));
+        Image am1=rrr.getImage();
+        Image am2=am1.getScaledInstance(proicon.getWidth(), proicon.getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon RRR=new ImageIcon(am2);
+        proicon.setIcon(RRR);
+        
+        ImageIcon ICON2=new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("HRYICON.jpg")));
+        Image ICON_2_1=ICON2.getImage();
+        Image ICON_2_2=ICON_2_1.getScaledInstance(HRTICON.getWidth(), HRTICON.getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon IMAGE2=new ImageIcon(ICON_2_2);
+        HRTICON.setIcon(IMAGE2);
+        
+        ImageIcon ICON3=new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("buy-icon-32.png")));
+        Image ICON_3_1=ICON3.getImage();
+        Image ICON_3_2=ICON_3_1.getScaledInstance(neworicon.getWidth(), neworicon.getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon IMAGE3=new ImageIcon(ICON_3_2);
+        neworicon.setIcon(IMAGE3);
+        
+    
+    this.id=id;
+    this.type=type;
+        
+    }
+
+private void SHOWBActionPerformed(java.awt.event.ActionEvent evt) {                                      
+        PreparedStatement ps;
+        ResultSet rs;
+        
+        
+        
+        try {
+            
+            ps = MyConnection.getConnection().prepareStatement(query);
+            ps.setInt(1, id);
+            rs=ps.executeQuery();
+            ResultSetMetaData rsmd=(ResultSetMetaData) rs.getMetaData();
+           
+            System.out.println(id);
+            DefaultTableModel model=(DefaultTableModel) orderTable.getModel();
+            
+            
+            int col=rsmd.getColumnCount();
+            String[] colName=new String[col];
+            
+            for(int i=0; i<col;i++){
+            colName[i]=rsmd.getColumnName(i+1);
+            model.setColumnIdentifiers(colName);
+            }
+            
+            String name,ph,mname,siorco;
+            
+            while(rs.next()){
+            name=rs.getString(1);
+            ph=rs.getString(2);
+            mname=rs.getString(3);
+            siorco=rs.getString(4);
+            
+            String raw[]={name,ph,mname,siorco};
+            
+            model.addRow(raw);
+            
+            
+            }
+            
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(HTRY.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+private void sendBActionPerformed(java.awt.event.ActionEvent evt) {                                      
+      PreparedStatement ps;
+       ResultSet rs;
+       int mid = 0;
+       double cost = 0;
+       int did=1;
+       int orid = 0;
+       Double size = Double.valueOf(sizeTF.getText());
+       
+       if(type=="donor"){
+           
+        q1="Insert into contain_of_pro(order_ID ,client_ID,material_ID ,size) values(?,?,?,?);";
+        q2="Insert into proorder ( clientID,orderID,driverID) values(?,?,?)";
+        q3="SELECT orderID FROM proorder ORDER BY orderID DESC LIMIT 1";
+        
+        }
+       
+       
+        else{
+        q1="Insert into contain_of_pur(order_ID, client_ID,material_ID ,size) values(?,?,?,?);";
+        q2="Insert into purorder ( clientID,orderID ,totalCost,driverID) values(?,?,?,?)";
+        q3="SELECT orderID FROM purorder ORDER BY orderID DESC LIMIT 1";
+        
+        }
+       
+       
+              
+        /*if(x== null)
+        {
+            JOptionPane.showMessageDialog(null, "Choose a material from the list");
+        }
+        
+        else if(size == null)
+        {
+            JOptionPane.showMessageDialog(null, "Enter the approximate size of the material");
+        }
+        else if(size.isNaN()) {
+            JOptionPane.showMessageDialog(null, "Enter the approximate size of the material as double value");
+        }
+        else{*/
+        
+        try {
+          
+            ps = MyConnection.getConnection().prepareStatement(query);
+            ps.setString(1, x);//x is the item from combo box
+            
+            rs = ps.executeQuery();
+                        
+            if(rs.next()){
+              mid=rs.getInt("materialID");
+              cost =rs.getDouble("material_cost");
+              
+              
+              ps = MyConnection.getConnection().prepareStatement(q3);
+              rs = ps.executeQuery();
+              if(rs.next()){
+              orid=rs.getInt("orderID")+1;
+              
+              }
+              
+              
+            }
+            MyConnection.getConnection().close();
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(NewOrder.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        
+       try {
+           
+            //int size =Integer.parseInt( sizeTF.getText());
+            
+            ps = MyConnection.getConnection().prepareStatement(q2);
+            ps.setInt(1, id);
+            ps.setInt(2,orid);
+            
+            
+            if(type=="donor"){
+                ps.setInt(3,did);}
+                
+            
+            else{
+                double tot=(size*cost)/100;//otalCost DOUBLE(5,2) GENERATED ALWAYS AS (SUM(Material.material_cost * CONTAIN_OF_PUR.size) FROM CONTAIN_OF_PRO, Material WHERE Material.material_ID = CONTAIN_OF_PUR.material_ID AND CONTAIN_OF_PUR.order_ID = orderID ), -- COMPUTED VALUE
+                
+                ps.setInt(3,did);
+                ps.setDouble(4,tot);
+                }
+            
+            if(ps.executeUpdate() > 0){
+               
+                
+                try{
+                ps = MyConnection.getConnection().prepareStatement(q1);
+                ps.setInt(1, orid);
+                ps.setInt(2,id);
+                ps.setInt(3,mid);
+                ps.setDouble(4,size);
+                
+            if(ps.executeUpdate() > 0) 
+                JOptionPane.showMessageDialog(null, "New order Add");
+                }catch (SQLException ex) {
+            Logger.getLogger(NewOrder.class.getName()).log(Level.SEVERE, null, ex);}
+            }
+       }catch (SQLException ex) {
+            Logger.getLogger(NewOrder.class.getName()).log(Level.SEVERE, null, ex);
+        }    
+        
+        //}
+        
+        
+    }
+private void itemActionPerformed(java.awt.event.ActionEvent evt) {                                     
+      x=item.getSelectedItem().toString();
+      query="SELECT materialID,material_cost FROM material WHERE material_name=?";
+       
+    }
+
+
+
